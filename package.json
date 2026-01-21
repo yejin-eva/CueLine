@@ -1,0 +1,26 @@
+{
+  "name": "cueline",
+  "version": "1.0.0",
+  "description": "Character.AI MCP Server for Claude",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "setup": "node src/setup.js",
+    "test:connection": "node src/test-connection.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yejin-eva/CueLine.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yejin-eva/CueLine/issues"
+  },
+  "homepage": "https://github.com/yejin-eva/CueLine#readme",
+  "dependencies": {
+    "cainode": "^1.2.3"
+  }
+}
