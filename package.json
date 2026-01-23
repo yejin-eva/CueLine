@@ -7,6 +7,7 @@
   "scripts": {
     "setup": "node src/setup.js",
     "test:connection": "node src/test-connection.js",
+    "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,6 +22,11 @@
   },
   "homepage": "https://github.com/yejin-eva/CueLine#readme",
   "dependencies": {
-    "cainode": "^1.2.3"
+    "@modelcontextprotocol/sdk": "^1.25.3",
+    "cainode": "^1.2.3",
+    "zod": "^4.3.6"
+  },
+  "bin": {
+    "cueline": "./src/index.js"
   }
 }
