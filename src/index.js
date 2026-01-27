@@ -9,6 +9,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import * as listCharacters from './tools/list-characters.js';
+
 // Get the directory where this script is located
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -53,11 +55,8 @@ async function ensureLoggedIn()
 }
 
 server.registerTool(
-    'list-characters',
-    {
-        description: 'List all your recent Character.AI characters',
-        inputSchema: {}
-    },
+    listCharacters.definition.name,
+    listCharacters.definition,
     async () => {
         if (!await ensureLoggedIn())
         {
@@ -66,20 +65,9 @@ server.registerTool(
                 text: 'Error: No token. Run npm run setup'
             }]};
         }
-
-        // Get recent characters
-        const recent = await client.character.recent_list();
-        const chats = recent?.chats || [];
-
-        // Return result
-        return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify(chats, null, 2)
-            }]
-        };
+        return listCharacters.handler(client);
     }
-)
+);
 
 
 async function main()
