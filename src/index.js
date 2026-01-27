@@ -10,6 +10,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import * as listCharacters from './tools/list-characters.js';
+import * as getConversationHistory from './tools/get-conversation-history.js';
 
 // Get the directory where this script is located
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -66,6 +67,22 @@ server.registerTool(
             }]};
         }
         return listCharacters.handler(client);
+    }
+);
+
+server.registerTool(
+    getConversationHistory.definition.name,
+    getConversationHistory.definition,
+    async (params) => 
+    {
+        if (!await ensureLoggedIn())
+        {
+            return { content: [{
+                type: 'text',
+                text: 'Error: No token. Run npm run setup'
+            }]};
+        }
+        return getConversationHistory.handler(client, params);
     }
 );
 
