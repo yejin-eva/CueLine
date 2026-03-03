@@ -3,38 +3,19 @@
 // import servers
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { z } from 'zod/mini';
 import { CAINode } from 'cainode';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 import * as listCharacters from './tools/list-characters.js';
 import * as getConversationHistory from './tools/get-conversation-history.js';
 import * as sendMessage from './tools/send-message.js';
+import * as deleteMessages from './tools/delete-messages.js';
+import * as swipeMessage from './tools/swipe-message.js';
+import * as generateTurn from './tools/generate-turn.js';
+import * as listAccounts from './tools/list-accounts.js';
+import * as addAccount from './tools/add-account.js';
+import * as switchAccount from './tools/switch-account.js';
+import { getActiveToken } from './accounts.js';
 
-// Get the directory where this script is located
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// load token from .env file (always from project root)
-function loadToken()
-{
-    try
-    {
-        const envPath = path.join(__dirname, '..', '.env');
-        const envContent = fs.readFileSync(envPath, 'utf-8');
-        const match = envContent.match(/CAI_TOKEN=(.+)/);
-        if (match)
-        {
-            return match[1].trim();
-        }
-    }
-    catch (e)
-    {
-        // file not found or can't read
-    }
-    return null;
-}
 
 const server = new McpServer({
     name: 'cueline',
@@ -48,7 +29,7 @@ async function ensureLoggedIn()
 {
     if (isLoggedIn) return true;
 
-    const token = loadToken();
+    const token = getActiveToken();
     if (!token) return false;
 
     await client.login(token);
@@ -102,6 +83,78 @@ server.registerTool(
         return sendMessage.handler(client, params);
     }
 )
+
+server.registerTool(
+    deleteMessages.definition.name,
+    deleteMessages.definition,
+    async (params) =>
+    {
+        if (!await ensureLoggedIn())
+        {
+            return {content: [{
+                type: 'text',
+                text: 'Error: No token. Run npm run setup'
+            }]};
+        }
+        return deleteMessages.handler(client, params);
+    }
+);
+
+server.registerTool(
+    swipeMessage.definition.name,
+    swipeMessage.definition,
+    async (params) =>
+    {
+        if (!await ensureLoggedIn())
+        {
+            return {content: [{
+                type: 'text',
+                text: 'Error: No token. Run npm run setup'
+            }]};
+        }
+        return swipeMessage.handler(client, params);
+    }
+);
+
+server.registerTool(
+    generateTurn.definition.name,
+    generateTurn.definition,
+    async (params) =>
+    {
+        if (!await ensureLoggedIn())
+        {
+            return {content: [{
+                type: 'text',
+                text: 'Error: No token. Run npm run setup'
+            }]};
+        }
+        return generateTurn.handler(client, params);
+    }
+);
+
+server.registerTool(
+    listAccounts.definition.name,
+    listAccounts.definition,
+    async () => listAccounts.handler(client)
+);
+
+server.registerTool(
+    addAccount.definition.name,
+    addAccount.definition,
+    async (params) => addAccount.handler(client, params)
+);
+
+server.registerTool(
+    switchAccount.definition.name,
+    switchAccount.definition,
+    async (params) =>
+    {
+        const result = await switchAccount.handler(client, params);
+        // update login state after switching
+        isLoggedIn = !result.content[0].text.startsWith('ERROR');
+        return result;
+    }
+);
 
 async function main()
 {
